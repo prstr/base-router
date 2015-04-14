@@ -49,7 +49,8 @@ $.get('/*.html', function(req, res, next) {
       cb(null, html);
     });
   }, function(err, html) {
-    /* istanbul ignore if */
+    if (err)
+      return next(err);
     if (!html)
       return next();
     res.send(html);
