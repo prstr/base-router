@@ -1,7 +1,7 @@
 {
-  "name": "prostore.base-router",
+  "name": "prostore.site-router",
   "version": "0.0.1",
-  "description": "ProStore Base Router",
+  "description": "ProStore Site Router",
   "main": "src/index.js",
   "dependencies": {
     "express": "*",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/prstr/base-router"
+    "url": "https://github.com/prstr/site-router"
   },
   "keywords": [
     "prostore",
@@ -18,7 +18,7 @@
   "author": "Boris Okunskiy",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/prstr/base-router/issues"
+    "url": "https://github.com/prstr/site-router/issues"
   },
-  "homepage": "https://github.com/prstr/base-router"
+  "homepage": "https://github.com/prstr/site-router"
 }
