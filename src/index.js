@@ -2,7 +2,8 @@
 
 var express = require('express')
   , path = require('path')
-  , fallback = require('fallback');
+  , fallback = require('fallback')
+  , debug = require('debug')('prostore:site');
 
 /**
  * Маршруты для отрисовки страниц сайта с помощью встроенного шаблонизатора.
@@ -40,6 +41,7 @@ router.get('/*.html', function(req, res, next) {
     , fallbackFile = path.join(
       path.dirname(file), path.basename(file, '.html'), 'index.html');
   fallback([file, fallbackFile], function(file, cb) {
+    debug('Trying %s', file);
     res.render(file, function(err, html) {
       /* istanbul ignore if */
       if (err) return cb();
