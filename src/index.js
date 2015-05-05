@@ -5,6 +5,8 @@ var express = require('express')
   , fallback = require('fallback')
   , debug = require('debug')('prostore:site');
 
+var router = module.exports = exports = new express.Router();
+
 /**
  * Маршруты для отрисовки страниц сайта с помощью встроенного шаблонизатора.
  * Эти маршруты применяется ко всем URL, обработка которых не завершилась выше,
@@ -22,8 +24,6 @@ var express = require('express')
  * Поиск шаблонов осуществляется в директории `site` папки с шаблонами
  * (т.е. `<storeRoot>/templates/site`).
  */
-var router = module.exports = exports = new express.Router();
-
 router.get('/*', function(req, res, next) {
   var ext = path.extname(req.url);
   if (!ext)
@@ -43,7 +43,6 @@ router.get('/*.html', function(req, res, next) {
   fallback([file, fallbackFile], function(file, cb) {
     debug('Trying %s', file);
     res.render(file, function(err, html) {
-      /* istanbul ignore if */
       if (err) return cb();
       cb(null, html);
     });
