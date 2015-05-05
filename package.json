@@ -1,6 +1,6 @@
 {
   "name": "prostore.site-router",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "ProStore Site Router",
   "main": "src/index.js",
   "dependencies": {
