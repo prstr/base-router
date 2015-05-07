@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var express = require('express')
   , async = require('async')
@@ -15,25 +15,25 @@ var router = module.exports = exports = new express.Router();
  * В `res.render` должен находиться шаблонизатор ProStore.
  * В `res.locals.root` должен лежать путь к корню магазина.
  */
-router.get('/*', function(req, res, next) {
+router.get('/*', function (req, res, next) {
   var id = req.params[0].replace(/\.html$/, '');
   var file = path.join(res.locals.root, 'pages', id + '.json');
   debug('Trying %s', file);
-  fs.readJsonFile(file, 'utf-8', function(err, page) {
+  fs.readJsonFile(file, 'utf-8', function (ignoredErr, page) {
     if (!page) return next();
     // Render page blocks
-    async.map(page.blocks || [], function(block, cb) {
+    async.map(page.blocks || [], function (block, cb) {
       res.render('blocks/' + (block.type || 'default') + '.html', {
         block: block
-      }, function(err, html) {
+      }, function (err, html) {
         if (err) return cb(err);
         block.html = html;
         cb(null, block);
       });
-    }, function(err, blocks) {
+    }, function (err, blocks) {
       if (err) return next(err);
       page.id = id;
-      page.html = blocks.map(function(block) { return block.html }).join('\n');
+      page.html = blocks.map(function (block) { return block.html; }).join('\n');
       res.render(page.template || 'pages/default.html', {
         page: page
       });
@@ -60,29 +60,29 @@ router.get('/*', function(req, res, next) {
  *
  * В `res.render` должен находиться шаблонизатор ProStore.
  */
-router.get('/*', function(req, res, next) {
+router.get('/*', function (req, res, next) {
   var ext = path.extname(req.url);
   if (!ext)
     req.url += '.html';
   next();
 });
 
-router.get('/*.svg', function(req, res, next) {
+router.get('/*.svg', function (req, res) {
   res.type('image/svg+xml');
   res.render('site' + req.url);
 });
 
-router.get('/*.html', function(req, res, next) {
+router.get('/*.html', function (req, res, next) {
   var file = path.join('site', req.url)
     , fallbackFile = path.join(
       path.dirname(file), path.basename(file, '.html'), 'index.html');
-  fallback([file, fallbackFile], function(file, cb) {
+  fallback([file, fallbackFile], function (file, cb) {
     debug('Trying %s', file);
-    res.render(file, function(err, html) {
+    res.render(file, function (err, html) {
       if (err) return cb();
       cb(null, html);
     });
-  }, function(err, html) {
+  }, function (err, html) {
     if (err)
       return next(err);
     if (!html)
