@@ -1,6 +1,6 @@
 {
   "name": "prostore.site-router",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "ProStore Site Router",
   "main": "src/index.js",
   "dependencies": {
@@ -17,7 +17,9 @@
   "scripts": {
     "pretest": "eslint ."
   },
-  "pre-commit": [ "test" ],
+  "pre-commit": [
+    "test"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/prstr/site-router"
