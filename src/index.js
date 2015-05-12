@@ -1,11 +1,12 @@
 'use strict';
 
 var express = require('express')
-  , async = require('async')
   , fs = require('fs-extra')
   , path = require('path')
   , fallback = require('fallback')
-  , debug = require('debug')('prostore:site');
+  , debug = require('debug')('prostore:site')
+  , rho = require('rho')
+  , fm = require('json-matter');
 
 var router = module.exports = exports = new express.Router();
 
@@ -17,23 +18,14 @@ var router = module.exports = exports = new express.Router();
  */
 router.get('/*', function (req, res, next) {
   var id = req.params[0].replace(/\.html$/, '');
-  var file = path.join(res.locals.root, 'pages', id + '.json');
+  var file = path.join(res.locals.root, 'pages', id + '.rho');
   debug('Trying %s', file);
-  fs.readJsonFile(file, 'utf-8', function (ignoredErr, page) {
-    if (!page) return next();
-    // Render page blocks
-    async.map(page.blocks || [], function (block, cb) {
-      res.render('blocks/' + (block.type || 'default') + '.html', {
-        block: block
-      }, function (err, html) {
-        if (err) return cb(err);
-        block.html = html;
-        cb(null, block);
-      });
-    }, function (err, blocks) {
+  fs.readFile(file, 'utf-8', function (ignoredErr, text) {
+    if (!text) return next();
+    var page = fm.parse(text);
+    rho.render(page.__content__, function (err, html) {
       if (err) return next(err);
-      page.id = id;
-      page.html = blocks.map(function (block) { return block.html; }).join('\n');
+      page.html = html;
       res.render(page.template || 'pages/default.html', {
         page: page
       });

@@ -7,8 +7,9 @@
     "express": "*",
     "fallback": "*",
     "debug": "*",
-    "async": "*",
-    "fs-extra": "*"
+    "fs-extra": "*",
+    "rho": "*",
+    "json-matter": "*"
   },
   "devDependencies": {
     "eslint": "*",
