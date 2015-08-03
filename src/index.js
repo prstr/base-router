@@ -11,24 +11,46 @@ var express = require('express')
 var router = module.exports = exports = new express.Router();
 
 /**
+ * Добавляет расширение `.html` для запросов без расширений.
+ *
+ * Таким образом, страницы могут отдаваться либо совсем без расширений,
+ * либо с расширением `.html`.
+ */
+router.get('/*', function (req, res, next) {
+  var ext = path.extname(req.url);
+  if (!ext)
+    req.url += '.html';
+  next();
+});
+
+/**
  * Маршруты для работы с редактируемыми страницами.
  *
  * В `res.render` должен находиться шаблонизатор ProStore.
  * В `res.locals.root` должен лежать путь к корню магазина.
  */
-router.get('/*', function (req, res, next) {
+router.get('/*.html', function (req, res, next) {
   var id = req.params[0].replace(/\.html$/, '');
-  var file = path.join(res.locals.root, 'pages', id + '.rho');
-  debug('Trying %s', file);
-  fs.readFile(file, 'utf-8', function (ignoredErr, text) {
-    if (!text) return next();
-    var page = fm.parse(text);
-    rho.render(page.__content__, function (err, html) {
-      if (err) return next(err);
-      page.html = html;
-      res.render(page.template || 'pages/default.html', {
-        page: page
+  var root = path.join(res.locals.root, 'pages')
+    , file = path.join(root, id + '.rho')
+    , fallbackFile = path.join(root, path.basename(file, '.rho'), 'index.rho');
+  fallback([file, fallbackFile], function (file, cb) {
+    debug('Trying %s', file);
+    fs.readFile(file, 'utf-8', function (ignoredErr, text) {
+      if (!text) return cb();
+      var page = fm.parse(text);
+      rho.render(page.__content__, function (ignoredErr, html) {
+        page.html = html || '';
+        cb(null, page);
       });
+    });
+  }, function (err, page) {
+    if (err)
+      return next(err);
+    if (!page)
+      return next();
+    res.render(page.template || 'pages/default.html', {
+      page: page
     });
   });
 });
@@ -40,11 +62,10 @@ router.get('/*', function (req, res, next) {
  *
  * Логика работы:
  *
- *   1. если URL не содержит расширения, подразумевается `.html`
- *   2. шаблонизатор поддерживает SVG, файлы отрисовываются и отдаются
+ *   1. шаблонизатор поддерживает SVG, файлы отрисовываются и отдаются
  *      с `Content-Type: image/svg+xml`
- *   3. шаблонизатор пробует отрисовать страницу `<templates>/site/<url>.html`
- *   4. если с шагом 3 возникли проблемы, пробуем отрисовать страницу
+ *   2. шаблонизатор пробует отрисовать страницу `<templates>/site/<url>.html`
+ *   3. если с шагом 2 возникли проблемы, пробуем отрисовать страницу
  *      `<templates>/site/<url>/index.html`
  *
  * Поиск шаблонов осуществляется в директории `site` папки с шаблонами
@@ -52,13 +73,6 @@ router.get('/*', function (req, res, next) {
  *
  * В `res.render` должен находиться шаблонизатор ProStore.
  */
-router.get('/*', function (req, res, next) {
-  var ext = path.extname(req.url);
-  if (!ext)
-    req.url += '.html';
-  next();
-});
-
 router.get('/*.svg', function (req, res) {
   res.type('image/svg+xml');
   res.render('site' + req.url);
